@@ -1,9 +1,15 @@
 const axios = require('axios');
 const { buildLandTrendPrompt } = require('../prompts/landTrendPrompt');
+const { reverseGeocode } = require('../utils/geocode');
 
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
 exports.generateTrend = async (input) => {
+
+  if (!input.location) {
+    input.location = await reverseGeocode(input.latitude, input.longitude);
+  }
+
   const prompt = buildLandTrendPrompt(input);
 
   const headers = {
@@ -42,7 +48,8 @@ exports.generateTrend = async (input) => {
       throw new Error("LLM response does not contain valid JSON");
     }
 
-    return JSON.parse(jsonMatch[0]);
+    return { jsonMatch, input}
+    // JSON.parse(jsonMatch[0]);
 
   } catch (err) {
     console.error("🔥 Perplexity API Error:", err.response?.data || err.message);

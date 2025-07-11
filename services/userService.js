@@ -33,3 +33,38 @@ exports.createUserToken = async (phone) => {
 
   return token;
 };
+
+exports.getPortfolioValue = async (userId) => {
+  try {
+    const properties = await Property.find({ userId });
+
+    const totalValue = properties.reduce((sum, prop) => {
+      return sum + (prop.propertyPrice || 0);
+    }, 0);
+
+    return {
+      success: true,
+      totalValue,
+      propertiesCount: properties.length,
+    };
+  } catch (error) {
+    console.error("Error in getPortfolioValue:", error);
+    return {
+      success: false,
+      message: "Error while fetching portfolio value",
+    };
+  }
+};
+
+exports.getAllProperties = async (userId) => {
+  try {
+    const properties = await Property.find({ userId }, { _id: 1, size: 1, areaType: 1, landType: 1, });
+    return properties;
+  } catch (error) {
+    console.error("Error in getAllProperties:", error);
+    return {
+      success: false,
+      message: "Error while fetching all properties",
+    };
+  }
+}

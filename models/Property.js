@@ -42,6 +42,31 @@ const propertySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+
+    propertyPrice: {
+      type: Number,
+      default: 0
+    },
+
+    propertyPriceYear: {
+      type: String,
+      default: null,
+    },
+
+    priceFetchDate: {
+      type: Date,
+      default: null
+    },
+
+    priceTrend: {
+      type: Object,
+      default: null   
+    },
+
+    explaination: {
+      type: String,
+      default: null
+    }
   },
   {
     timestamps: true,

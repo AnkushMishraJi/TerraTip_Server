@@ -8,5 +8,7 @@ const { validateName, validateEmail, validatePhoneNumber, validatePropertyGeoLoc
 router.post('/addUser', validateName, validateEmail, validatePhoneNumber, userController.newUserSignUp);
 router.post('/addProperty', validatePropertyGeoLocation, validatePropertyAreaType, validatePropertySize, verifyToken, userController.addProperty);
 router.post('/generateToken', validatePhoneNumber, userController.generateTokenFromUserDetails);
+router.get('/portfolio', verifyToken, userController.getPortfolio);
+router.get('/properties', verifyToken, userController.getAllProperties);
 
 module.exports = router;
