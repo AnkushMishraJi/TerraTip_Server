@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-
+const errorHandler = require('./utils/errorHandler');
 const connectDB = require('./config/mongoose');
 const adminRoutes = require('./routes/admin');
 const clientRoutes = require('./routes/client');
@@ -27,6 +27,7 @@ app.get('/', (req, res) => {
 // Admin and Client routes
 app.use('/admin', adminRoutes);
 app.use('/client', clientRoutes);
+app.use(errorHandler);
 
 // Start server
 app.listen(port, () => {
