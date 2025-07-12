@@ -38,3 +38,4 @@ module.exports = (err, req, res, next) => {
     ...(NODE_ENV == 'development' && { stack: err.stack }),
   });
 };
+
