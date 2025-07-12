@@ -40,20 +40,23 @@ userSchema.statics.findByPhone = function (phone) {
   return this.findOne({ phone });
 };
 
-// Pre-save hook for duplicate email/phone
 userSchema.pre('save', async function (next) {
   try {
     if (this.isModified('email') && this.email) {
       const existingEmail = await this.constructor.findOne({ email: this.email });
       if (existingEmail && existingEmail._id.toString() !== this._id.toString()) {
-        return next(new Error('Email already exists'));
+        const error = new Error('Email already exists');
+        error.statusCode = 409;
+        return next(error);
       }
     }
 
     if (this.isModified('phone')) {
       const existingPhone = await this.constructor.findOne({ phone: this.phone });
       if (existingPhone && existingPhone._id.toString() !== this._id.toString()) {
-        return next(new Error('Phone number already exists'));
+        const error = new Error('Phone number already exists');
+        error.statusCode = 409;
+        return next(error);
       }
     }
 
@@ -63,7 +66,6 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-// Pre-update hook for duplicate check
 userSchema.pre('findOneAndUpdate', async function (next) {
   try {
     const update = this.getUpdate();
@@ -75,7 +77,9 @@ userSchema.pre('findOneAndUpdate', async function (next) {
         _id: { $ne: query._id || this.getQuery()._id },
       });
       if (existingEmail) {
-        return next(new Error('Email already exists'));
+        const error = new Error('Email already exists');
+        error.statusCode = 409;
+        return next(error);
       }
     }
 
@@ -85,7 +89,9 @@ userSchema.pre('findOneAndUpdate', async function (next) {
         _id: { $ne: query._id || this.getQuery()._id },
       });
       if (existingPhone) {
-        return next(new Error('Phone number already exists'));
+        const error = new Error('Phone number already exists');
+        error.statusCode = 409;
+        return next(error);
       }
     }
 
@@ -94,5 +100,6 @@ userSchema.pre('findOneAndUpdate', async function (next) {
     next(err);
   }
 });
+
 
 module.exports = mongoose.model('User', userSchema);
