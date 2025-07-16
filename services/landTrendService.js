@@ -19,8 +19,8 @@ exports.generateTrend = async (input) => {
 
   const body = {
     model: "sonar",
-    temperature: 0.3,              // ✅ Consistent, realistic outputs
-    top_p: 0.85,                   // ✅ Slight diversity
+    temperature: 0.3,
+    top_p: 0.85,
     frequency_penalty: 0.0,
     presence_penalty: 0.0,
     max_tokens: 300,

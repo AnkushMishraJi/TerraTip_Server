@@ -6,7 +6,7 @@ exports.newUserSignUp = catchAsync(async (req, res, next) => {
     const { name, email, phone } = req.body;
     const newUser = await userService.addNewUser(name, email, phone);
     if (!newUser) {
-        return res.status(500).json({
+        return res.status(400).json({
             status: 'error',
             message: 'User creation failed',
         });
@@ -43,7 +43,7 @@ exports.addProperty = catchAsync(async (req, res, next) => {
   let input = {
     latitude: coordinates.latitude,
     longitude: coordinates.longitude,
-    size_sqft: size.split(" ")[0],
+    size_sqft: size,
     area_type: areaType
   }
 
@@ -57,7 +57,8 @@ exports.generateTokenFromUserDetails = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: 'success',
     message: 'Token generated successfully',
-    data: token
+    data: token.token,
+    name: token.name
   });
 });
 
