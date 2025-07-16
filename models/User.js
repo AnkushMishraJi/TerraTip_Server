@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
@@ -60,13 +61,13 @@ userSchema.pre('save', async function (next) {
       }
     }
 
-    next();
+    return next();
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
-userSchema.pre('findOneAndUpdate', async function (next) {
+userSchema.pre('findOneAndUpdate', async (next) => {
   try {
     const update = this.getUpdate();
     const query = this.getQuery();
@@ -94,11 +95,11 @@ userSchema.pre('findOneAndUpdate', async function (next) {
         return next(error);
       }
     }
-
-    next();
   } catch (err) {
     next(err);
   }
+
+  return next();
 });
 
 

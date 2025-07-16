@@ -3,11 +3,12 @@ const authRoutes = require('./auth');
 const landTrendRoutes = require('./landTrendRoutes');
 const uploadRoutes = require('./upload');  // ✅ Add this line
 const userRoutes = require('./userRoutes');
+
 const router = express.Router();
 
 // Placeholder client route
 router.get('/', (req, res) => {
-  res.send('Client route');s
+  res.send('Client route');
 });
 
 router.use('/auth', authRoutes);

@@ -12,11 +12,9 @@ const jwt = require('jsonwebtoken');
 //   }
 // };
 
-exports.createToken = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, {
+exports.createToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-};
 
 exports.verifyToken = (req, res, next) => {
   try {
@@ -31,7 +29,7 @@ exports.verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.userId = decoded.userId;
-    next();
+    return next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token has expired. Please login again.' });

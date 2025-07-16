@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan(':method :url :status :response-time ms'));
 app.use(cors());
-const port = process.env.PORT || 4002;
+const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 connectDB();

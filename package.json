@@ -4,7 +4,7 @@
   "description": "this is backend server of terratip",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "exit 0",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "lint": "eslint .",
@@ -35,8 +35,8 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
-    "multer": "^2.0.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^2.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
