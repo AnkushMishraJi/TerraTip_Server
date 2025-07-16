@@ -57,9 +57,8 @@ exports.validatePropertyGeoLocation = (req, res, next) => {
 
 exports.validatePropertySize = (req, res, next) => {
   const schema = Joi.object({
-    size: Joi.string()
-      .trim()
-      .pattern(constants.regex.size)
+    size: Joi.number()
+      .min(100)
       .required(),
   }).unknown();
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const errorHandler = require('./utils/errorHandler');
 const connectDB = require('./config/mongoose');
@@ -14,6 +15,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan(':method :url :status :response-time ms'));
+app.use(cors());
+const port = process.env.PORT || 4002;
 const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
@@ -23,6 +26,12 @@ connectDB();
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}));
 
 // Admin and Client routes
 app.use('/admin', adminRoutes);

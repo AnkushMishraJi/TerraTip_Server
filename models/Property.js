@@ -24,9 +24,9 @@ const propertySchema = new mongoose.Schema(
         max: [180, 'Longitude must be <= 180'],
       },
     },
-
+    
     size: {
-      type: String,
+      type: Number,
       trim: true,
       default: null,
     },

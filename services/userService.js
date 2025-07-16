@@ -23,7 +23,7 @@ exports.addUserProperty = async (userId, coordinates, size = null, areaType = nu
 };
 
 exports.createUserToken = async (phone) => {
-  const userDetails = await User.findOne({ phone }, { phone: 1, _id: 1 });
+  const userDetails = await User.findOne({ phone }, { phone: 1, _id: 1, name: 1 });
 
   if (!userDetails) {
     throw new Error('User not found');
@@ -31,20 +31,32 @@ exports.createUserToken = async (phone) => {
 
   const token = createToken({ userId: userDetails._id });
 
-  return token;
+  return { token, name: userDetails.name };
 };
 
 exports.getPortfolioValue = async (userId) => {
   try {
+    if (!userId) {
+      return {
+        success: false,
+        message: "User ID is required",
+      };
+    }
+
     const properties = await Property.find({ userId });
 
-    const totalValue = properties.reduce((sum, prop) => {
-      return sum + (prop.propertyPrice || 0);
-    }, 0);
+    let totalValue = 0;
+    let totalArea = 0;
+
+    properties.forEach((prop) => {
+      totalValue += Number(prop.propertyPrice) || 0;
+      totalArea += Number(prop.size) || 0;
+    });
 
     return {
       success: true,
       totalValue,
+      totalArea,
       propertiesCount: properties.length,
     };
   } catch (error) {
