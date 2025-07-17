@@ -6,7 +6,7 @@ const connectDB = async () => {
     if (process.env.NODE_ENV === 'production') {
       dbURI = process.env.MONGO_URI_PROD;
     } else {
-      dbURI = process.env.MONGO_URI_DEV || 'mongodb://localhost:27017/terratip_dev';
+      dbURI = process.env.MONGO_URI_DEV;
     }
     await mongoose.connect(dbURI, {
       useNewUrlParser: true,

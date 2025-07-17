@@ -9,7 +9,7 @@ exports.validateName = (req, res, next) => {
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
-  next();
+  return next();
 };
 
 exports.validateEmail = (req, res, next) => {
@@ -21,7 +21,7 @@ exports.validateEmail = (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  next();
+  return next();
 };
 
 exports.validatePhoneNumber = (req, res, next) => {
@@ -35,7 +35,7 @@ exports.validatePhoneNumber = (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  next();
+  return next();
 };
 
 exports.validatePropertyGeoLocation = (req, res, next) => {
@@ -52,7 +52,7 @@ exports.validatePropertyGeoLocation = (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  next();
+  return next();
 };
 
 exports.validatePropertySize = (req, res, next) => {
@@ -68,7 +68,7 @@ exports.validatePropertySize = (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  next();
+  return next();
 };
 
 exports.validatePropertyAreaType = (req, res, next) => {
@@ -84,5 +84,5 @@ exports.validatePropertyAreaType = (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  next();
+  return next();
 };

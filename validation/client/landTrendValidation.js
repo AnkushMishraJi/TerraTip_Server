@@ -1,5 +1,4 @@
 const Joi = require('joi');
-const constants = require('../../config/constant');
 
 exports.validateLatitude = (req, res, next) => {
     const schema = Joi.object({ latitude: Joi.number().min(-90).max(90).required() }).unknown();
@@ -7,7 +6,7 @@ exports.validateLatitude = (req, res, next) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    next();
+    return next();
 }
 
 exports.validateLongitude = (req, res, next) => {
@@ -16,7 +15,7 @@ exports.validateLongitude = (req, res, next) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    next();
+    return next();
 }
 
 
@@ -26,7 +25,7 @@ exports.validateSizeSqft = (req, res, next) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    next();
+    return next();
 }
 
 
@@ -36,5 +35,5 @@ exports.validateAreaType = (req, res, next) => {
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
-    next();
+    return next();
 }

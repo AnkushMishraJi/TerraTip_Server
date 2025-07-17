@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const dotenv = require('dotenv');
 const routes = require('./routes/index.route');
-const errorHandler = require('./utils/errorHandler');
+// const errorHandler = require('./utils/errorHandler');
 
 dotenv.config();
 
