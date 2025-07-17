@@ -1,3 +1,4 @@
+require('dotenv').config();
 const axios = require('axios');
 const { buildLandTrendPrompt } = require('../prompts/landTrendPrompt');
 const { reverseGeocode } = require('../utils/geocode');
