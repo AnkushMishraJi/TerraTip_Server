@@ -1,8 +1,7 @@
 const express = require('express');
-const authRoutes = require('./auth');
-const landTrendRoutes = require('./landTrendRoutes');
-const uploadRoutes = require('./upload');  // ✅ Add this line
-const userRoutes = require('./userRoutes');
+const landTrendRoutes = require('./landTrend');
+const uploadRoutes = require('./upload');
+const userRoutes = require('./user');
 
 const router = express.Router();
 
@@ -11,9 +10,8 @@ router.get('/', (req, res) => {
   res.send('Client route');
 });
 
-router.use('/auth', authRoutes);
 router.use('/land-trend', landTrendRoutes);
-router.use('/upload', uploadRoutes); // ✅ Mount the upload route
+router.use('/upload', uploadRoutes);
 router.use('/user', userRoutes);
 module.exports = router;
 

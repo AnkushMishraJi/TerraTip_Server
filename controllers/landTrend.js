@@ -1,5 +1,5 @@
 const { reverseGeocode } = require('../utils/geocode');
-const landTrendService = require('../services/landTrendService'); 
+const landTrendService = require('../services/landTrend'); 
 const catchAsync = require('../utils/catchAsync');
 
 exports.getTrend = catchAsync(async (req, res) => {

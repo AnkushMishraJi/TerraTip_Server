@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const eventEmitter = new EventEmitter();
 const Property = require('../../../models/Property');
-const landTrendService = require('../../../services/landTrendService');
+const landTrendService = require('../../../services/landTrend');
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -12,7 +12,6 @@ eventEmitter.on('updatePropertyPrice', async (input, propertyId, userId) => {
     let attempts = 0;
     let result = null;
 
-    // Retry loop for generateTrend
     while (attempts < MAX_RETRIES) {
       result = await landTrendService.generateTrend(input);
 
