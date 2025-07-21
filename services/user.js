@@ -1,10 +1,22 @@
+const { status } = require('http-status');
 const User = require('../models/User');
 const Property = require('../models/Property');
 const { createToken } = require('../middlewares/auth');
+const ApiError = require('../utils/ApiError');
 
 exports.addNewUser = async (name, email, phone) => {
+  try {
     const newUser = await User.create({ name, email, phone });
-    return newUser || false;
+    return newUser;
+  } catch (error) {
+    // if we want to hide the actual server error and throw a custom error use this
+     throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Internal Server error",
+      error
+    );
+  }
+    
 } 
 
 exports.addUserProperty = async (userId, coordinates, size = null, areaType = null, landType = null) => {

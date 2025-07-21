@@ -1,5 +1,5 @@
 const catchAsync = require('../utils/catchAsync');
-const userService = require('../services/userService');
+const userService = require('../services/user');
 const eventEmitter = require('../events/clients/landTrends/landEventEmitter');
 
 exports.newUserSignUp = catchAsync(async (req, res, next) => {
@@ -22,7 +22,7 @@ exports.newUserSignUp = catchAsync(async (req, res, next) => {
 
 exports.addProperty = catchAsync(async (req, res, next) => {
   const { coordinates, size, areaType, landType } = req.body;
-  let userId = req.userId;
+  let userId = req.params.userId;
   const newProperty = await userService.addUserProperty(userId, coordinates, size, areaType, landType );
 
   if (!newProperty) {
@@ -63,7 +63,7 @@ exports.generateTokenFromUserDetails = catchAsync(async (req, res, next) => {
 });
 
 exports.getPortfolio = catchAsync(async (req, res, next) => {
-  let userId = req.userId;
+  let userId = req.params.userId;
   const portfolio = await userService.getPortfolioValue(userId);
 
   res.status(201).json({
@@ -77,7 +77,7 @@ exports.getPortfolio = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllProperties = catchAsync(async (req, res, next) => {
-  let userId = req.userId;
+  let userId = req.params.userId;
   const properties = await userService.getAllProperties(userId);
 
   res.status(201).json({

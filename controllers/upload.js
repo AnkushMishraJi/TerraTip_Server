@@ -1,4 +1,4 @@
-const { handleUploadAndGetUrl, generatePresignedUrlByFilename } = require('../services/uploadService');
+const { handleUploadAndGetUrl, generatePresignedUrlByFilename } = require('../services/upload');
 const catchAsync = require('../utils/catchAsync');
 
 exports.uploadFile = catchAsync(async (req, res) => {
