@@ -29,15 +29,15 @@ exports.generateToken = async (body) => {
     }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
-    // const saltRounds = 10;
-    // const hashedToken = await bcrypt.hash(rawToken, saltRounds);
+    const saltRounds = 10;
+    const hashedToken = await bcrypt.hash(rawToken, saltRounds);
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await PasswordResetToken.findOneAndUpdate(
       email ? { email } : { phoneNumber },
       {
-        token: rawToken,
+        token: hashedToken,
         email: email || null,
         phoneNumber: phoneNumber || null,
         expiresAt,

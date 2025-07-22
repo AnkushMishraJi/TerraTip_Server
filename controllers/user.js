@@ -106,8 +106,8 @@ exports.verifyInvitationToken = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
           message: 'Token is valid',
-          email: result.tokenDocs?.email,
-          phoneNumber: result.tokenDocs?.phoneNumber,
+          email: result.matchedDoc?.email,
+          phoneNumber: result.matchedDoc?.phoneNumber,
         },
     });
 });

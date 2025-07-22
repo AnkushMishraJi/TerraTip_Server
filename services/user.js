@@ -97,20 +97,28 @@ exports.getAllProperties = async (userId) => {
 
 exports.verifyToken = async (token) => {
   try {
-    const tokenDocs = await PasswordResetToken.findOne({ token });
-    
-    if (!tokenDocs) {
+    const tokenDocs = await PasswordResetToken.find();
+
+    let matchedDoc = null;
+
+    for (const doc of tokenDocs) {
+      const isMatch = await bcrypt.compare(token, doc.token);
+      if (isMatch) {
+        matchedDoc = doc;
+        break;
+      }
+    }
+
+    if (!matchedDoc) {
       return { valid: false, message: 'Invalid or expired token' };
     }
 
     const now = new Date();
-    if (tokenDocs.expiresAt < now) {
+    if (matchedDoc.expiresAt < now) {
       return { valid: false, message: 'Token has expired' };
     }
 
-    console.log(`tokenDocs`, tokenDocs);
-
-    return { valid: true, tokenDocs, };
+    return { valid: true, matchedDoc };
   } catch (error) {
     console.error('Token verification failed:', error);
     return { valid: false, message: 'Internal server error' };
