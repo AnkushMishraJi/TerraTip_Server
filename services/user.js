@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Property = require('../models/Property');
 const { createToken } = require('../middlewares/auth');
 const ApiError = require('../utils/ApiError');
+const PasswordResetToken = require('../models/PasswordReset');
+const bcrypt = require("bcryptjs");
 
 exports.addNewUser = async (name, email, phone) => {
   try {
@@ -92,3 +94,25 @@ exports.getAllProperties = async (userId) => {
     };
   }
 }
+
+exports.verifyToken = async (token) => {
+  try {
+    const tokenDocs = await PasswordResetToken.findOne({ token });
+    
+    if (!tokenDocs) {
+      return { valid: false, message: 'Invalid or expired token' };
+    }
+
+    const now = new Date();
+    if (tokenDocs.expiresAt < now) {
+      return { valid: false, message: 'Token has expired' };
+    }
+
+    console.log(`tokenDocs`, tokenDocs);
+
+    return { valid: true, tokenDocs, };
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    return { valid: false, message: 'Internal server error' };
+  }
+};

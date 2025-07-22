@@ -1,6 +1,7 @@
 const catchAsync = require('../utils/catchAsync');
 const userService = require('../services/user');
 const eventEmitter = require('../events/clients/landTrends/landEventEmitter');
+const PasswordService = require('../services/user');
 
 exports.newUserSignUp = catchAsync(async (req, res, next) => {
     const { name, email, phone } = req.body;
@@ -87,4 +88,26 @@ exports.getAllProperties = catchAsync(async (req, res, next) => {
       properties: properties || [],
     },
   });
+});
+
+exports.verifyInvitationToken = catchAsync(async (req, res, next) => {
+    const { token } = req.query;
+
+    const result = await PasswordService.verifyToken(token);
+
+    if (!result.valid) {
+        return res.status(400).json({
+        status: 'fail',
+        message: result.message,
+        });
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+          message: 'Token is valid',
+          email: result.tokenDocs?.email,
+          phoneNumber: result.tokenDocs?.phoneNumber,
+        },
+    });
 });

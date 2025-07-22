@@ -9,6 +9,7 @@ const propertyRouter = require('./property/property');
 
 router.post('/', validate(addUser), userController.newUserSignUp);
 router.post('/generateToken', validate(generateToken), userController.generateTokenFromUserDetails);
+router.get('/validate', userController.verifyInvitationToken);
 
 router.use(verifyToken);
 router.use('/property', propertyRouter);
