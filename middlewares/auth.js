@@ -12,13 +12,13 @@ const jwt = require('jsonwebtoken');
 //   }
 // };
 
-exports.createToken = (payload) => jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+exports.createToken = (payload, expireTime) => jwt.sign(payload, process.env.JWT_SECRET, {
+  expiresIn: expireTime || process.env.JWT_EXPIRES_IN,
+});
 
 exports.verifyToken = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization || `Bearer ${req.query.token}`;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Token not found or invalid format' });

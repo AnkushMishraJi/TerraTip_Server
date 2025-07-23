@@ -11,41 +11,44 @@ exports.addNewUser = async (name, email, phone) => {
     const newUser = await User.create({ name, email, phone });
     return newUser;
   } catch (error) {
-    // if we want to hide the actual server error and throw a custom error use this
-     throw new ApiError(
-      status.INTERNAL_SERVER_ERROR,
-      "Internal Server error",
-      error
-    );
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, 'Internal Server error', error);
   }
-    
-} 
-
-exports.addUserProperty = async (userId, coordinates, size = null, areaType = null, landType = null) => {
-    const newProperty = await Property.create({
-        userId,
-        coordinates: {
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-        },
-        size,
-        areaType,
-        landType,
-    });
-
-    return newProperty || false;
 };
 
-exports.createUserToken = async (phone) => {
-  const userDetails = await User.findOne({ phone }, { phone: 1, _id: 1, name: 1 });
+exports.addUserProperty = async (
+  userId,
+  coordinates,
+  size = null,
+  areaType = null,
+  landType = null
+) => {
+  const newProperty = await Property.create({
+    userId,
+    coordinates: {
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+    },
+    size,
+    areaType,
+    landType,
+  });
+
+  return newProperty || false;
+};
+
+exports.createUserToken = async (email, expiresAt) => {
+  const userDetails = await User.findOne({ email }, { phone: 1, _id: 1, name: 1 });
 
   if (!userDetails) {
     throw new Error('User not found');
   }
 
-  const token = createToken({ userId: userDetails._id });
+  const token = createToken({ userId: userDetails._id }, expiresAt);
 
-  return { token, name: userDetails.name };
+  return {
+    token,
+    name: userDetails.name
+  };
 };
 
 exports.getPortfolioValue = async (userId) => {
@@ -53,7 +56,7 @@ exports.getPortfolioValue = async (userId) => {
     if (!userId) {
       return {
         success: false,
-        message: "User ID is required",
+        message: 'User ID is required',
       };
     }
 
@@ -74,53 +77,62 @@ exports.getPortfolioValue = async (userId) => {
       propertiesCount: properties.length,
     };
   } catch (error) {
-    console.error("Error in getPortfolioValue:", error);
+    console.error('Error in getPortfolioValue:', error);
     return {
       success: false,
-      message: "Error while fetching portfolio value",
+      message: 'Error while fetching portfolio value',
     };
   }
 };
 
 exports.getAllProperties = async (userId) => {
   try {
-    const properties = await Property.find({ userId }, { _id: 1, size: 1, areaType: 1, landType: 1, });
+    const properties = await Property.find(
+      { userId },
+      { _id: 1, size: 1, areaType: 1, landType: 1 }
+    );
     return properties;
   } catch (error) {
-    console.error("Error in getAllProperties:", error);
+    console.error('Error in getAllProperties:', error);
     return {
       success: false,
-      message: "Error while fetching all properties",
+      message: 'Error while fetching all properties',
     };
   }
-}
+};
 
-exports.verifyToken = async (token) => {
-  try {
-    const tokenDocs = await PasswordResetToken.find();
+exports.resetPasswordSer = async (email, password, userId, name, phone) => {
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: userId, email },
+    { password, name, phone },
+    { new: true }
+  );
 
-    let matchedDoc = null;
-
-    for (const doc of tokenDocs) {
-      const isMatch = await bcrypt.compare(token, doc.token);
-      if (isMatch) {
-        matchedDoc = doc;
-        break;
-      }
-    }
-
-    if (!matchedDoc) {
-      return { valid: false, message: 'Invalid or expired token' };
-    }
-
-    const now = new Date();
-    if (matchedDoc.expiresAt < now) {
-      return { valid: false, message: 'Token has expired' };
-    }
-
-    return { valid: true, matchedDoc };
-  } catch (error) {
-    console.error('Token verification failed:', error);
-    return { valid: false, message: 'Internal server error' };
+  if (!updatedUser) {
+    throw new ApiError(status.NOT_FOUND, 'User not found with the provided credentials.');
   }
+
+  return updatedUser;
+};
+
+exports.userLoginSer = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(status.NOT_FOUND, 'User not found with the provided email.');
+  }
+
+  if (!user.password) {
+    throw new ApiError(status.NOT_FOUND, 'Password is not set. Please set the password first');
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  console.log("132", isMatch);
+
+  if (!isMatch) {
+    throw new ApiError(status.UNAUTHORIZED, 'Invalid password.');
+  }
+
+  let token = createToken({ userId: user._id });
+
+  return { user, token } ;
 };

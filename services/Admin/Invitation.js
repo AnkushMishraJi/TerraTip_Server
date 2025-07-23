@@ -1,62 +1,25 @@
 const { status } = require('http-status');
 const ApiError = require('../../utils/ApiError');
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
-const PasswordResetToken = require('../../models/PasswordReset');
 const User = require('../../models/User');
+const userService = require('../../services/user');
 
-exports.generateToken = async (body) => {
-  try {
-    const { email, phoneNumber } = body;
-
-    if ((email && phoneNumber) || (!email && !phoneNumber)) {
-      throw new ApiError(
-        status.BAD_REQUEST,
-        'Exactly one of email or phoneNumber must be provided, not both or none.'
-      );
-    }
-
-    const existingUser = await User.findOne({
-      ...(email ? { email } : { phoneNumber })
-    });
-    
-
-    if (existingUser) {
-      throw new ApiError(
-        status.CONFLICT,
-        'User already exists, no need to generate invitation link.'
-      );
-    }
-
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const saltRounds = 10;
-    const hashedToken = await bcrypt.hash(rawToken, saltRounds);
-
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await PasswordResetToken.findOneAndUpdate(
-      email ? { email } : { phoneNumber },
-      {
-        token: hashedToken,
-        email: email || null,
-        phoneNumber: phoneNumber || null,
-        expiresAt,
-        used: false,
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-
-    return rawToken;
-
-  } catch (error) {
-    
-    if (error instanceof ApiError) {
-      throw error;
-    }
+exports.generateLink = async (body) => {
+  let { email, phone, name } = body;
+  const existingUser = await User.findOne({ email });
+  
+  if (existingUser) {
     throw new ApiError(
-      status.INTERNAL_SERVER_ERROR,
-      'Internal Server Error',
-      error
+      status.CONFLICT,
+      'User already exists, no need to generate invitation link.'
     );
   }
+  let newUser = await User.create({ email, phone, name });
+  const expiresAt = `1d`    
+  let { token } = await userService.createUserToken(newUser?.email, expiresAt);
+  console.log("e", email)
+  const queryParams = new URLSearchParams({
+    ...(name && { name }),
+    ...(phone && { phone }),
+  });
+  return `${process.env.WEB_LINK}/client/user/password-reset?token=${token}&email=${email}&${queryParams.toString()}`;
 };

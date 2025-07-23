@@ -1,9 +1,8 @@
 const catchAsync = require('../utils/catchAsync');
 const userService = require('../services/user');
 const eventEmitter = require('../events/clients/landTrends/landEventEmitter');
-const PasswordService = require('../services/user');
 
-exports.newUserSignUp = catchAsync(async (req, res, next) => {
+exports.newUserSignUp = catchAsync(async (req, res) => {
     const { name, email, phone } = req.body;
     const newUser = await userService.addNewUser(name, email, phone);
     if (!newUser) {
@@ -21,7 +20,7 @@ exports.newUserSignUp = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.addProperty = catchAsync(async (req, res, next) => {
+exports.addProperty = catchAsync(async (req, res) => {
   const { coordinates, size, areaType, landType } = req.body;
   let userId = req.params.userId;
   const newProperty = await userService.addUserProperty(userId, coordinates, size, areaType, landType );
@@ -52,18 +51,13 @@ exports.addProperty = catchAsync(async (req, res, next) => {
 
 });
 
-exports.generateTokenFromUserDetails = catchAsync(async (req, res, next) => {
-  const { phone } = req.body;
-  let token = await userService.createUserToken(phone);
-  res.status(201).json({
-    status: 'success',
-    message: 'Token generated successfully',
-    data: token.token,
-    name: token.name
-  });
+exports.generateTokenFromUserDetails = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  let data = await userService.createUserToken(email);
+  res.status(201).json({ data });
 });
 
-exports.getPortfolio = catchAsync(async (req, res, next) => {
+exports.getPortfolio = catchAsync(async (req, res) => {
   let userId = req.params.userId;
   const portfolio = await userService.getPortfolioValue(userId);
 
@@ -77,7 +71,7 @@ exports.getPortfolio = catchAsync(async (req, res, next) => {
 
 });
 
-exports.getAllProperties = catchAsync(async (req, res, next) => {
+exports.getAllProperties = catchAsync(async (req, res) => {
   let userId = req.params.userId;
   const properties = await userService.getAllProperties(userId);
 
@@ -90,24 +84,20 @@ exports.getAllProperties = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.verifyInvitationToken = catchAsync(async (req, res, next) => {
-    const { token } = req.query;
-
-    const result = await PasswordService.verifyToken(token);
-
-    if (!result.valid) {
-        return res.status(400).json({
-        status: 'fail',
-        message: result.message,
-        });
-    }
-
+exports.resetPassword = catchAsync(async (req, res) => {
+    const { email, name, phone } = req.query;
+    const { password } = req.body;
+    const userId = req.userId;
+    const result = await userService.resetPasswordSer(email, password, userId, name, phone);
     res.status(200).json({
-        status: 'success',
-        data: {
-          message: 'Token is valid',
-          email: result.matchedDoc?.email,
-          phoneNumber: result.matchedDoc?.phoneNumber,
-        },
+        data: result
+    });
+});
+
+exports.userLogin = catchAsync(async (req, res) => {
+    const { email, password } = req.body;
+    const result = await userService.userLoginSer(email, password);
+    res.status(200).json({
+        data: result
     });
 });
