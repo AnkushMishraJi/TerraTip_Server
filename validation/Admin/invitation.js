@@ -5,5 +5,4 @@ const invitationLink = Joi.object({
   phone: Joi.string().pattern(/^[6-9]\d{9}$/),
 }).xor('email', 'phone');
 
-
 module.exports = { invitationLink };
