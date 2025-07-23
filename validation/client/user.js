@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const phone = Joi.string()
-  .pattern(/^[6-9]\d{9}$/) // (starts with 6-9, 10 digits)
+  .pattern(/^[6-9]\d{9}$/)
   .required()
   .messages({
     'string.empty': 'Phone number is required',
@@ -20,21 +20,50 @@ const email = Joi.string()
   .lowercase()
   .email({ tlds: { allow: false } });
 
-const addUser = {
+const addUserVal = {
   body: Joi.object().keys({
     name: name.required(),
-    email: email.optional(),
-    phone,
+    email: email.required(),
+    phone: phone.optional(),
   }),
 };
 
-const generateToken = {
+const generateTokenVal = {
   body: Joi.object().keys({
-    phone,
+    email: email.required(),
   }),
 };
+
+const passwordSchema = Joi.string()
+  .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,16}$'))
+  .required()
+  .messages({
+    'string.pattern.base':
+      'Password must be 8-16 characters long and include uppercase, lowercase, number, and special character.',
+  });
+
+const resetPasswordVal = {
+  body: Joi.object({
+    password: passwordSchema,
+    confirmPassword: Joi.any()
+      .valid(Joi.ref('password'))
+      .required()
+      .messages({
+        'any.only': 'Confirm password does not match password',
+      }),
+  }),
+};
+
+const userLoginVal = {
+  body: Joi.object({
+    email: email.required(),
+    password: passwordSchema,
+  })
+}
 
 module.exports = {
-  addUser,
-  generateToken,
+  addUserVal,
+  generateTokenVal,
+  resetPasswordVal,
+  userLoginVal
 };
