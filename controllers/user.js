@@ -3,17 +3,9 @@ const userService = require('../services/user');
 const eventEmitter = require('../events/clients/landTrends/landEventEmitter');
 
 exports.newUserSignUp = catchAsync(async (req, res) => {
-    const { name, email, phone } = req.body;
-    const newUser = await userService.addNewUser(name, email, phone);
-    if (!newUser) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'User creation failed',
-        });
-    }
-
+    const { name, email, phone, password } = req.body;
+    const newUser = await userService.addNewUser(name, email, phone, password);
     res.status(201).json({
-        status: 'success',
         data: {
             user: newUser,
         }
@@ -33,7 +25,6 @@ exports.addProperty = catchAsync(async (req, res) => {
   }
 
   res.status(201).json({
-    status: 'success',
     message: 'Property added successfully',
     data: {
       property: newProperty,
@@ -62,7 +53,6 @@ exports.getPortfolio = catchAsync(async (req, res) => {
   const portfolio = await userService.getPortfolioValue(userId);
 
   res.status(201).json({
-    status: 'success',
     message: 'Portfolio value fetched successfully',
     data: {
       portfolio: portfolio || 0,
@@ -76,7 +66,6 @@ exports.getAllProperties = catchAsync(async (req, res) => {
   const properties = await userService.getAllProperties(userId);
 
   res.status(201).json({
-    status: 'success',
     message: 'Properties data fetched successfully',
     data: {
       properties: properties || [],
@@ -100,4 +89,18 @@ exports.userLogin = catchAsync(async (req, res) => {
     res.status(200).json({
         data: result
     });
+});
+
+exports.userUpdate = catchAsync(async (req, res) => {
+  const { name, email, phone } = req.body;
+  let userId = req.userId
+  let result = await userService.userUpdateSer(userId, name, email, phone);
+  res.status(200).json(result);
+});
+
+exports.addPropertyDocument = catchAsync(async (req, res) => {
+  const userId = req.userId;
+  const { propertyId } = req.body;
+  let result = await userService.addPropertyDocumentSer(req.file, userId, propertyId);
+  res.status(200).json(result);
 });

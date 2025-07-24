@@ -20,20 +20,6 @@ const email = Joi.string()
   .lowercase()
   .email({ tlds: { allow: false } });
 
-const addUserVal = {
-  body: Joi.object().keys({
-    name: name.required(),
-    email: email.required(),
-    phone: phone.optional(),
-  }),
-};
-
-const generateTokenVal = {
-  body: Joi.object().keys({
-    email: email.required(),
-  }),
-};
-
 const passwordSchema = Joi.string()
   .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,16}$'))
   .required()
@@ -41,6 +27,12 @@ const passwordSchema = Joi.string()
     'string.pattern.base':
       'Password must be 8-16 characters long and include uppercase, lowercase, number, and special character.',
   });
+
+const generateTokenVal = {
+  body: Joi.object().keys({
+    email: email.required(),
+  }),
+};
 
 const resetPasswordVal = {
   body: Joi.object({
@@ -61,9 +53,35 @@ const userLoginVal = {
   })
 }
 
+const addUserVal = {
+  body: Joi.object().keys({
+    name: name.required(),
+    email: email.required(),
+    phone: phone.optional(),
+    password: passwordSchema,
+    confirmPassword: Joi.any()
+      .valid(Joi.ref('password'))
+      .required()
+      .messages({
+        'any.only': 'Confirm password does not match password',
+      }),
+  }),
+};
+
+const updateUserVal = Joi.object({
+  name: Joi.string().min(2).max(50).optional(),
+  email: Joi.string().email().optional(),
+  phone: Joi.string()
+    .pattern(/^\d{10,15}$/)
+    .message("Phone number must be 10 to 15 digits")
+    .optional(),
+});
+
+
 module.exports = {
   addUserVal,
   generateTokenVal,
   resetPasswordVal,
-  userLoginVal
+  userLoginVal,
+  updateUserVal
 };

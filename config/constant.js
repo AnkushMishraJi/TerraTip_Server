@@ -6,6 +6,11 @@ exports.regex = {
 }
 
 exports.areaType = {
+    urban: "URBAN",
+    rural: "RURAL"
+}
+
+exports.landType = {
     commercial: "COMMERCIAL",
     residential: "RESIDENTIAL"
 }

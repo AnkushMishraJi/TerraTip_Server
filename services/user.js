@@ -3,16 +3,11 @@ const User = require('../models/User');
 const Property = require('../models/Property');
 const { createToken } = require('../middlewares/auth');
 const ApiError = require('../utils/ApiError');
-const PasswordResetToken = require('../models/PasswordReset');
 const bcrypt = require("bcryptjs");
+const { handleUploadAndGetUrl } = require('./upload');
 
-exports.addNewUser = async (name, email, phone) => {
-  try {
-    const newUser = await User.create({ name, email, phone });
-    return newUser;
-  } catch (error) {
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, 'Internal Server error', error);
-  }
+exports.addNewUser = async (name, email, phone, password) => {
+  return await User.create({ name, email, phone, password });
 };
 
 exports.addUserProperty = async (
@@ -52,44 +47,39 @@ exports.createUserToken = async (email, expiresAt) => {
 };
 
 exports.getPortfolioValue = async (userId) => {
-  try {
-    if (!userId) {
-      return {
-        success: false,
-        message: 'User ID is required',
-      };
+  const properties = await Property.find({ userId }, { propertyPrice: 1, size: 1, priceTrend: 1 });
+  let totalValue = 0;
+  let totalArea = 0;
+  let priceTrendMap = {};
+
+  properties.forEach((prop) => {
+    totalValue += Number(prop.propertyPrice) || 0;
+    totalArea += Number(prop.size) || 0;
+
+    if (prop.priceTrend) {
+      let parsedTrend;
+      parsedTrend = typeof prop.priceTrend === 'string' ? JSON.parse(prop.priceTrend) : prop.priceTrend;
+      for (const [year, price] of Object.entries(parsedTrend)) {
+        priceTrendMap[year] = (priceTrendMap[year] || 0) + Number(price);
+      }
     }
+  });
 
-    const properties = await Property.find({ userId });
+  const priceTrend = Object.entries(priceTrendMap).map(([year, price]) => ({ year, price }));
 
-    let totalValue = 0;
-    let totalArea = 0;
-
-    properties.forEach((prop) => {
-      totalValue += Number(prop.propertyPrice) || 0;
-      totalArea += Number(prop.size) || 0;
-    });
-
-    return {
-      success: true,
-      totalValue,
-      totalArea,
-      propertiesCount: properties.length,
-    };
-  } catch (error) {
-    console.error('Error in getPortfolioValue:', error);
-    return {
-      success: false,
-      message: 'Error while fetching portfolio value',
-    };
-  }
+  return {
+    totalValue,
+    totalArea,
+    propertiesCount: properties.length,
+    priceTrend,
+  };
 };
 
 exports.getAllProperties = async (userId) => {
   try {
     const properties = await Property.find(
       { userId },
-      { _id: 1, size: 1, areaType: 1, landType: 1 }
+      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1 }
     );
     return properties;
   } catch (error) {
@@ -126,7 +116,6 @@ exports.userLoginSer = async (email, password) => {
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  console.log("132", isMatch);
 
   if (!isMatch) {
     throw new ApiError(status.UNAUTHORIZED, 'Invalid password.');
@@ -135,4 +124,25 @@ exports.userLoginSer = async (email, password) => {
   let token = createToken({ userId: user._id });
 
   return { user, token } ;
+};
+
+exports.userUpdateSer = async (userId, name, email, phone) => {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid or missing user ID");
+  }
+  let body = {};
+  if (email) body.email = email;  
+  if (phone) body.phone = phone;  
+  if (name) body.name = name;  
+  return await User.findByIdAndUpdate(userId, body, { new: true });
+};
+
+exports.addPropertyDocumentSer = async (file, userId, propertyId) => {
+  const result = await handleUploadAndGetUrl(file);
+  const property = await Property.findById(propertyId);
+  if (!property.documents || !Array.isArray(property.documents)) {
+    property.documents = [];
+  }
+  property.documents.push(result.url);
+  return await property.save();
 };
