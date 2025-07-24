@@ -12,6 +12,7 @@ router.post('/generateToken', validate(generateTokenVal), userController.generat
 router.post('/login', validate(userLoginVal), userController.userLogin);
 router.use(verifyToken);
 router.put('/password-reset', validate(resetPasswordVal), userController.resetPassword);
+router.put('/edit', userController.userUpdate);
 router.use('/property', propertyRouter);
     
 module.exports = router;

@@ -35,12 +35,15 @@ const propertySchema = new mongoose.Schema(
       type: String,
       enum: Object.values(constants.areaType),
       default: null,
+      required: [true, 'Please enter area type']
     },
 
     landType: {
       type: String,
+      enum: Object.values(constants.landType),
       trim: true,
       default: null,
+      required: [true, 'Please enter land type']
     },
 
     propertyPrice: {
@@ -66,6 +69,11 @@ const propertySchema = new mongoose.Schema(
     explaination: {
       type: String,
       default: null
+    },
+
+    documents: {
+      type: [String],
+      default: []
     }
   },
   {
