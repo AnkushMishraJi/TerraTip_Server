@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-const { addUserVal, generateTokenVal, resetPasswordVal, userLoginVal } = require("../../validation/client/user");
+const { addUserVal, generateTokenVal, resetPasswordVal, userLoginVal, updateUserVal } = require("../../validation/client/user");
 const validate = require('../../middlewares/validate');
 const userController = require('../../controllers/user');
 const { verifyToken } = require('../../middlewares/auth');
@@ -12,7 +12,7 @@ router.post('/generateToken', validate(generateTokenVal), userController.generat
 router.post('/login', validate(userLoginVal), userController.userLogin);
 router.use(verifyToken);
 router.put('/password-reset', validate(resetPasswordVal), userController.resetPassword);
-router.put('/edit', userController.userUpdate);
+router.patch('/:userId', validate(updateUserVal), userController.userUpdate);
 router.use('/property', propertyRouter);
     
 module.exports = router;

@@ -1,4 +1,5 @@
 const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi);
 
 const phone = Joi.string()
   .pattern(/^[6-9]\d{9}$/)
@@ -72,9 +73,11 @@ const updateUserVal = Joi.object({
   name: Joi.string().min(2).max(50).optional(),
   email: Joi.string().email().optional(),
   phone: Joi.string()
-    .pattern(/^\d{10,15}$/)
-    .message("Phone number must be 10 to 15 digits")
+    .pattern(/^[6-9]\d{9}$/)
+    .message("Phone number must be a valid 10-digit Indian mobile number")
     .optional(),
+  params: Joi.object({ userId: Joi.objectId().required() }),
+
 });
 
 
