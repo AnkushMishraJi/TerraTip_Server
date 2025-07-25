@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       // required: [true, 'Please enter phone number'],
-      unique: true,
+      // unique: true,
       trim: true,
       match: [/^\d{10,15}$/, 'Please enter a valid phone number'],
     },
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       // required: [true, 'Please enter password'],
       minlength: [6, 'Password must be at least 6 characters'],
       // select: false,
-    }
+    },
   },
   {
     timestamps: true,
