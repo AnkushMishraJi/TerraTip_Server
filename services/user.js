@@ -1,14 +1,14 @@
 const { status } = require('http-status');
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Property = require('../models/Property');
 const { createToken } = require('../middlewares/auth');
 const ApiError = require('../utils/ApiError');
-const bcrypt = require("bcryptjs");
 const { handleUploadAndGetUrl } = require('./upload');
 
-exports.addNewUser = async (name, email, phone, password) => {
-  return await User.create({ name, email, phone, password });
-};
+exports.addNewUser = async (name, email, phone, password) =>
+  User.create({ name, email, phone, password });
 
 exports.addUserProperty = async (
   userId,
@@ -42,7 +42,7 @@ exports.createUserToken = async (email, expiresAt) => {
 
   return {
     token,
-    name: userDetails.name
+    name: userDetails.name,
   };
 };
 
@@ -50,18 +50,19 @@ exports.getPortfolioValue = async (userId) => {
   const properties = await Property.find({ userId }, { propertyPrice: 1, size: 1, priceTrend: 1 });
   let totalValue = 0;
   let totalArea = 0;
-  let priceTrendMap = {};
+  const priceTrendMap = {};
 
   properties.forEach((prop) => {
     totalValue += Number(prop.propertyPrice) || 0;
     totalArea += Number(prop.size) || 0;
 
     if (prop.priceTrend) {
-      let parsedTrend;
-      parsedTrend = typeof prop.priceTrend === 'string' ? JSON.parse(prop.priceTrend) : prop.priceTrend;
-      for (const [year, price] of Object.entries(parsedTrend)) {
+      const parsedTrend =
+        typeof prop.priceTrend === 'string' ? JSON.parse(prop.priceTrend) : prop.priceTrend;
+
+      Object.entries(parsedTrend).forEach(([year, price]) => {
         priceTrendMap[year] = (priceTrendMap[year] || 0) + Number(price);
-      }
+      });
     }
   });
 
@@ -76,40 +77,36 @@ exports.getPortfolioValue = async (userId) => {
 };
 
 exports.getAllProperties = async (userId) => {
-  // try {
-    const properties = await Property.find(
-      { userId },
-      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1, priceTrend: 1 }
-    );
+  const properties = await Property.find(
+    { userId },
+    {
+      _id: 1,
+      size: 1,
+      areaType: 1,
+      landType: 1,
+      coordinates: 1,
+      documents: 1,
+      priceTrend: 1,
+      explaination: 1,
+    }
+  );
 
-    const formattedProperties = properties.map((property) => {
-      let parsedTrend = null;
-      if (typeof property.priceTrend === 'string') {
-        // try {
-          parsedTrend = JSON.parse(property.priceTrend);
-        // } catch (err) {
-          // console.warn(`Invalid priceTrend JSON for property ID ${property._id}`);
-        // }
-      } else {
-        parsedTrend = [];
-      }
+  const formattedProperties = properties.map((property) => {
+    let parsedTrend = null;
+    if (typeof property.priceTrend === 'string') {
+      parsedTrend = JSON.parse(property.priceTrend);
+    } else {
+      parsedTrend = [];
+    }
 
-      return {
-        ...property.toObject(),
-        priceTrend: parsedTrend,
-      };
-    });
+    return {
+      ...property.toObject(),
+      priceTrend: parsedTrend,
+    };
+  });
 
-    return formattedProperties;
-  // } catch (error) {
-  //   console.error('Error in getAllProperties:', error);
-  //   return {
-  //     success: false,
-  //     message: 'Error while fetching all properties',
-  //   };
-  // }
+  return formattedProperties;
 };
-
 
 exports.resetPasswordSer = async (email, password, userId, name, phone) => {
   const updatedUser = await User.findOneAndUpdate(
@@ -141,22 +138,23 @@ exports.userLoginSer = async (email, password) => {
     throw new ApiError(status.UNAUTHORIZED, 'Invalid password.');
   }
 
-  let token = createToken({ userId: user._id });
+  const token = createToken({ userId: user._id });
+  const { _id, name, phone } = user;
 
-  const returnData = {  _id: user._id, email: user.email, name: user.name, phone: user.phone  }
+  const returnData = { _id, email, name, phone };
 
-  return { user: returnData, token } ;
+  return { user: returnData, token };
 };
 
 exports.userUpdateSer = async (userId, name, email, phone) => {
   if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-    throw new Error("Invalid or missing user ID");
+    throw new Error('Invalid or missing user ID');
   }
-  let body = {};
-  if (email) body.email = email;  
-  if (phone) body.phone = phone;  
-  if (name) body.name = name;  
-  return await User.findByIdAndUpdate(userId, body, { new: true });
+  const body = {};
+  if (email) body.email = email;
+  if (phone) body.phone = phone;
+  if (name) body.name = name;
+  return User.findByIdAndUpdate(userId, body, { new: true });
 };
 
 exports.addPropertyDocumentSer = async (file, userId, propertyId) => {
@@ -166,5 +164,5 @@ exports.addPropertyDocumentSer = async (file, userId, propertyId) => {
     property.documents = [];
   }
   property.documents.push(result.url);
-  return await property.save();
+  return property.save();
 };
