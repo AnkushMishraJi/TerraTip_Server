@@ -76,20 +76,40 @@ exports.getPortfolioValue = async (userId) => {
 };
 
 exports.getAllProperties = async (userId) => {
-  try {
+  // try {
     const properties = await Property.find(
       { userId },
-      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1 }
+      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1, priceTrend: 1 }
     );
-    return properties;
-  } catch (error) {
-    console.error('Error in getAllProperties:', error);
-    return {
-      success: false,
-      message: 'Error while fetching all properties',
-    };
-  }
+
+    const formattedProperties = properties.map((property) => {
+      let parsedTrend = null;
+      if (typeof property.priceTrend === 'string') {
+        // try {
+          parsedTrend = JSON.parse(property.priceTrend);
+        // } catch (err) {
+          // console.warn(`Invalid priceTrend JSON for property ID ${property._id}`);
+        // }
+      } else {
+        parsedTrend = [];
+      }
+
+      return {
+        ...property.toObject(),
+        priceTrend: parsedTrend,
+      };
+    });
+
+    return formattedProperties;
+  // } catch (error) {
+  //   console.error('Error in getAllProperties:', error);
+  //   return {
+  //     success: false,
+  //     message: 'Error while fetching all properties',
+  //   };
+  // }
 };
+
 
 exports.resetPasswordSer = async (email, password, userId, name, phone) => {
   const updatedUser = await User.findOneAndUpdate(
