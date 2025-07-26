@@ -123,7 +123,7 @@ exports.resetPasswordSer = async (email, password, userId, name, phone) => {
 };
 
 exports.userLoginSer = async (email, password) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select('+password');
   if (!user) {
     throw new ApiError(status.NOT_FOUND, 'User not found with the provided email.');
   }
