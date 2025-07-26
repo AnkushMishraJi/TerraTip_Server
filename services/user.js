@@ -76,29 +76,20 @@ exports.getPortfolioValue = async (userId) => {
 };
 
 exports.getAllProperties = async (userId) => {
-  const properties = await Property.find(
+  try {
+    const properties = await Property.find(
       { userId },
-      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1, priceTrend: 1 }
+      { _id: 1, size: 1, areaType: 1, landType: 1, coordinates: 1, documents: 1 }
     );
-
-    const formattedProperties = properties.map((property) => {
-      let parsedTrend = null;
-      if (typeof property.priceTrend === 'string') {
-        // try {
-          parsedTrend = JSON.parse(property.priceTrend);
-        // } catch (err) {
-          // console.warn(`Invalid priceTrend JSON for property ID ${property._id}`);
-        // }
-      } else {
-        parsedTrend = [];
-      }
-
-    return { ...property.toObject(), priceTrend: parsedTrend };
-  });
-
-  return formattedProperties;
-} 
-
+    return properties;
+  } catch (error) {
+    console.error('Error in getAllProperties:', error);
+    return {
+      success: false,
+      message: 'Error while fetching all properties',
+    };
+  }
+};
 
 exports.resetPasswordSer = async (email, password, userId, name, phone) => {
   const updatedUser = await User.findOneAndUpdate(
@@ -115,7 +106,7 @@ exports.resetPasswordSer = async (email, password, userId, name, phone) => {
 };
 
 exports.userLoginSer = async (email, password) => {
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email });
   if (!user) {
     throw new ApiError(status.NOT_FOUND, 'User not found with the provided email.');
   }
