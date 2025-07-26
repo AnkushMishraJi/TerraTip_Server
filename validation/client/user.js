@@ -22,11 +22,11 @@ const email = Joi.string()
   .email({ tlds: { allow: false } });
 
 const passwordSchema = Joi.string()
-  .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,16}$'))
+  .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=]).{8,64}$/)
   .required()
   .messages({
     'string.pattern.base':
-      'Password must be 8-16 characters long and include uppercase, lowercase, number, and special character.',
+      'Password must be 8–64 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*()_-+=).',
   });
 
 const generateTokenVal = {
@@ -38,12 +38,9 @@ const generateTokenVal = {
 const resetPasswordVal = {
   body: Joi.object({
     password: passwordSchema,
-    confirmPassword: Joi.any()
-      .valid(Joi.ref('password'))
-      .required()
-      .messages({
-        'any.only': 'Confirm password does not match password',
-      }),
+    confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
+      'any.only': 'Confirm password does not match password',
+    }),
   }),
 };
 
@@ -51,8 +48,8 @@ const userLoginVal = {
   body: Joi.object({
     email: email.required(),
     password: passwordSchema,
-  })
-}
+  }),
+};
 
 const addUserVal = {
   body: Joi.object().keys({
@@ -60,24 +57,24 @@ const addUserVal = {
     email: email.required(),
     phone: phone.optional(),
     password: passwordSchema,
-    confirmPassword: Joi.any()
-      .valid(Joi.ref('password'))
-      .required()
-      .messages({
-        'any.only': 'Confirm password does not match password',
-      }),
+    confirmPassword: Joi.any().valid(Joi.ref('password')).required().messages({
+      'any.only': 'Confirm password does not match password',
+    }),
   }),
 };
 
 const updateUserVal = Joi.object({
-  name: Joi.string().min(2).max(50).optional(),
-  email: Joi.string().email().optional(),
-  phone: Joi.string()
-    .pattern(/^[6-9]\d{9}$/)
-    .message("Phone number must be a valid 10-digit Indian mobile number")
-    .optional(),
-  params: Joi.object({ userId: Joi.objectId().required() }),
-
+  body: Joi.object({
+    name: Joi.string().min(2).max(50).optional(),
+    email: Joi.string().email().optional(),
+    phone: Joi.string()
+      .pattern(/^[6-9]\d{9}$/)
+      .message("Phone number must be a valid 10-digit Indian mobile number")
+      .optional(),
+  }),
+  params: Joi.object({
+    userId: Joi.objectId().required(),
+  }),
 });
 
 
@@ -86,5 +83,5 @@ module.exports = {
   generateTokenVal,
   resetPasswordVal,
   userLoginVal,
-  updateUserVal
+  updateUserVal,
 };

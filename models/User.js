@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       // required: [true, 'Please enter phone number'],
-      unique: true,
+      // unique: true,
+      // sparse: true,
       trim: true,
       match: [/^\d{10,15}$/, 'Please enter a valid phone number'],
     },
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
       // required: [true, 'Please enter password'],
       minlength: [6, 'Password must be at least 6 characters'],
       // select: false,
-    }
+    },
   },
   {
     timestamps: true,
@@ -54,23 +55,6 @@ userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);
-    }
-    if (this.isModified('email') && this.email) {
-      const existingEmail = await this.constructor.findOne({ email: this.email });
-      if (existingEmail && existingEmail._id.toString() !== this._id.toString()) {
-        const error = new Error('Email already exists');
-        error.statusCode = 409;
-        return next(error);
-      }
-    }
-
-    if (this.isModified('phone')) {
-      const existingPhone = await this.constructor.findOne({ phone: this.phone });
-      if (existingPhone && existingPhone._id.toString() !== this._id.toString()) {
-        const error = new Error('Phone number already exists');
-        error.statusCode = 409;
-        return next(error);
-      }
     }
 
     return next();
