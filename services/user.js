@@ -123,7 +123,9 @@ exports.userLoginSer = async (email, password) => {
 
   let token = createToken({ userId: user._id });
 
-  return { user, token } ;
+  const returnData = {  _id: user._id, email: user.email, name: user.name, phone: user.phone  }
+
+  return { user: returnData, token } ;
 };
 
 exports.userUpdateSer = async (userId, name, email, phone) => {

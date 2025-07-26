@@ -93,7 +93,7 @@ exports.userLogin = catchAsync(async (req, res) => {
 
 exports.userUpdate = catchAsync(async (req, res) => {
   const { name, email, phone } = req.body;
-  let userId = req.userId
+  let userId = req.userId || req.params.userId;
   let result = await userService.userUpdateSer(userId, name, email, phone);
   res.status(200).json(result);
 });
