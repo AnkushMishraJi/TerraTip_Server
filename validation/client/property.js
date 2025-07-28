@@ -1,6 +1,7 @@
-const Joi = require('joi');
-Joi.objectId = require('joi-objectid')(Joi);
+const BaseJoi = require('joi');
+const joiObjectId = require('joi-objectid')(BaseJoi);
 const constants = require('../../config/constant');
+const Joi = BaseJoi;
 
 const size = Joi.number().min(100).required();
 
@@ -9,12 +10,17 @@ const coordinates = Joi.object({
   longitude: Joi.number().min(-180).max(180).required(),
 }).required();
 
-const landType = Joi.string().valid(...Object.values(constants.landType)).trim().required();
-const areaType = Joi.string().valid(...Object.values(constants.areaType)).required();
+const landType = Joi.string()
+  .valid(...Object.values(constants.landType))
+  .trim()
+  .required();
 
+const areaType = Joi.string()
+  .valid(...Object.values(constants.areaType))
+  .required();
 
 const paramsWithId = Joi.object({
-  userId: Joi.objectId().required(),
+  userId: joiObjectId().required(),
 });
 
 const addPropertyVal = {
@@ -33,9 +39,27 @@ const paramsVal = {
 
 const addPropertyDocument = {
   body: Joi.object().keys({
-    propertyId: Joi.string().required().label('propertyId'),
+    propertyId: joiObjectId().required().label('propertyId'),
   }),
 };
 
+const viewPropertyDocumentValidator = Joi.object({
+  uuid: Joi.string()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .required()
+    .messages({
+      'string.guid': 'UUID must be a valid UUID',
+      'any.required': 'UUID is required',
+    }),
+  propertyId: joiObjectId().required().messages({
+    'string.pattern.base': 'Property ID must be a valid Mongo ObjectId',
+    'any.required': 'Property ID is required',
+  }),
+});
 
-module.exports = { addPropertyVal, paramsVal, addPropertyDocument };
+module.exports = {
+  addPropertyVal,
+  paramsVal,
+  addPropertyDocument,
+  viewPropertyDocumentValidator,
+};
