@@ -52,7 +52,7 @@ exports.getPortfolio = catchAsync(async (req, res) => {
   let userId = req.params.userId;
   const portfolio = await userService.getPortfolioValue(userId);
 
-  res.status(201).json({
+  res.status(200).json({
     message: 'Portfolio value fetched successfully',
     data: {
       portfolio: portfolio || 0,
@@ -65,7 +65,7 @@ exports.getAllProperties = catchAsync(async (req, res) => {
   let userId = req.params.userId;
   const properties = await userService.getAllProperties(userId);
 
-  res.status(201).json({
+  res.status(200).json({
     message: 'Properties data fetched successfully',
     data: {
       properties: properties || [],
@@ -99,8 +99,13 @@ exports.userUpdate = catchAsync(async (req, res) => {
 });
 
 exports.addPropertyDocument = catchAsync(async (req, res) => {
-  const userId = req.userId;
-  const { propertyId } = req.body;
-  let result = await userService.addPropertyDocumentSer(req.file, userId, propertyId);
+  const { propertyId, docType } = req.body;
+  let result = await userService.addPropertyDocumentSer(req.file, docType, propertyId);
   res.status(200).json(result);
+});
+
+exports.viewPropertyDocument = catchAsync(async (req, res) => {
+  const { uuid, propertyId } = req.params;
+  let result = await userService.viewPropertyDocumentSer(uuid, propertyId);
+  res.status(200).json({ link: result });
 });

@@ -1,5 +1,6 @@
 const s3 = require('../config/aws');
 const { S3_BUCKET } = process.env;
+const { v4: uuidv4 } = require('uuid');
 
 const allowedMimeTypes = [
   'application/pdf',
@@ -20,12 +21,13 @@ const uploadToS3 = async (file, key) => {
   return s3.upload(params).promise();
 };
 
+
 const generatePresignedUrl = async (key) => {
   const params = {
     Bucket: S3_BUCKET,
     Key: key,
-    // Expires: 60 * 5,
-    Expires: 60 * 60 * 24 * 7,
+    Expires: 60 * 5,
+    // Expires: 60 * 60 * 24 * 7,
   };
 
   return s3.getSignedUrlPromise('getObject', params);
@@ -44,14 +46,18 @@ const handleUploadAndGetUrl = async (file) => {
     throw error;
   }
 
-  const s3Key = `Property_Document/${Date.now()}_${file.originalname}`;
+  const uniqueId = uuidv4();
+  const extension = file.originalname.split('.').pop();
+  const s3Key = `Property_Document/${uniqueId}.${extension}`;
   await uploadToS3(file, s3Key);
   const presignedUrl = await generatePresignedUrl(s3Key);
 
   return {
     message: 'File uploaded successfully',
     key: s3Key,
+    uuid: uniqueId,
     url: presignedUrl,
+    extension
   };
 };
 
@@ -62,7 +68,7 @@ const generatePresignedUrlByFilename = async (filename) => {
     throw error;
   }
 
-  return await generatePresignedUrl(filename);
+  return await generatePresignedUrl(`Property_Document/${filename}`);
 };
 
 module.exports = {
