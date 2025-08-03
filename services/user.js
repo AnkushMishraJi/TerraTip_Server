@@ -5,7 +5,7 @@ const User = require('../models/User');
 const Property = require('../models/Property');
 const { createToken } = require('../middlewares/auth');
 const ApiError = require('../utils/ApiError');
-const { handleUploadAndGetUrl } = require('./upload');
+const { handleUploadAndGetUrl, generatePresignedUrlByFilename } = require('./upload');
 
 exports.addNewUser = async (name, email, phone, password) =>
   User.create({ name, email, phone, password });
@@ -157,12 +157,21 @@ exports.userUpdateSer = async (userId, name, email, phone) => {
   return User.findByIdAndUpdate(userId, body, { new: true });
 };
 
-exports.addPropertyDocumentSer = async (file, userId, propertyId) => {
+exports.addPropertyDocumentSer = async (file, docType, propertyId) => {
   const result = await handleUploadAndGetUrl(file);
   const property = await Property.findById(propertyId);
+  if (!property) throw new Error('Property data not found');
   if (!property.documents || !Array.isArray(property.documents)) {
     property.documents = [];
   }
-  property.documents.push(result.url);
+  property.documents.push({ uuid: result.uuid, type: docType, ext: result.extension  });
   return property.save();
 };
+
+exports.viewPropertyDocumentSer = async (uuid, propertyId) => {
+  const property = await Property.findById(propertyId);
+  const document = property.documents.find((item) => item.uuid === uuid);
+  const result = await generatePresignedUrlByFilename(`${uuid}.${document.ext}`);
+  return result;
+};
+

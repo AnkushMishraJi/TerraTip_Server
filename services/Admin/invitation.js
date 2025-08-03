@@ -16,7 +16,6 @@ exports.generateLink = async (body) => {
   const newUser = await User.create({ email, phone, name });
   const expiresAt = `1d`;
   const { token } = await userService.createUserToken(newUser?.email, expiresAt);
-  console.log('e', email);
   const queryParams = new URLSearchParams({
     ...(name && { name }),
     ...(phone && { phone }),
